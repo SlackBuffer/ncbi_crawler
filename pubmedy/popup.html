@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html class='popup-page'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Settings</title>
+
+    <style class="cp-pen-styles">
+        #novopro-options-tab {
+            width: 550px;
+            border: 1px solid #eee;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        #novopro-options-tab td {
+            border: 1px solid #eee;
+            border-collapse: collapse;
+        }
+
+        #novopro-options-tab th {
+            width: 60%;
+            font-weight: 500;
+            color: #666;
+            border: 1px solid #eee;
+            border-collapse: collapse;
+        }
+
+        #novopro-btn-box {
+            width: 50px;
+            height: 20px;
+            padding: 3px;
+            border-radius: 30px;
+            -webkit-border-radius: 30px;
+            -moz-border-radius: 30px;
+            background-color: #838383;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        #novopro-btnn {
+            width: 20px;
+            height: 20px;
+            -webkit-border-radius: 30px;
+            -moz-border-radius: 30px;
+            border-radius: 30px;
+            background-color: #fff;
+            position: absolute;
+        }
+
+        input[type='text'] {
+            width: 200px;
+            height: 30px;
+            border: 1px solid #00bcd4;
+            padding: 2px 6px;
+            margin: 10px;
+        }
+
+        input[type='button'] {
+            display: inline-block;
+            margin-bottom: 0;
+            font-weight: 400;
+            line-height: 25px;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            background-image: none;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            user-select: none;
+            background-color: #008CBA;
+            border: none;
+            color: #FFFFFF;
+            text-align: center;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+            margin: 10px 0 !important;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<table id="novopro-options-tab">
+    <tr>
+        <th class="first">Highlight Pubmed Search Results?</th>
+        <td>
+            <div id="novopro-btn-box">
+                <div isopen="false" id="novopro-btnn"></div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <th>Highlight when IF greater than:</th>
+        <td class="center">
+            <input type='text' id="novopro-threshold" style="width:50px; height:20px" value="0.0" placeholder="Number">
+        </td>
+    </tr>
+    <tr>
+        <th>Set Sci-Hub URL:</th>
+        <td class="center">
+            <input type='text' id="novopro-sci-hub" value="" placeholder="sci-hub">
+        </td>
+    </tr>
+    <tr>
+        <td colspan='2'>
+            <b style="color:#08c">If current sci-hub is not working, please empty the text-box above.</b></td>
+    </tr>
+    <tr>
+        <th><input type='text' id="novopro-doi" value="" placeholder="Input doi or pubmed id here"></th>
+        <td class="center"><input type="button" id="novopro-fetch-pdf" value="Fetch PDF"></td>
+    </tr>
+    <tr>
+        <td colspan="2">Report problems to mmbioe@gmail.com. Any Suggestions are welcome.</td>
+    </tr>
+    <tr>
+        <td colspan="2"><a href="https://www.novoprolabs.com/support/articles/pubmedy-a-chrome-extension-for-ncbi-201712191285.html" target="_blank">Learn more about this extension</a></td>
+    </tr>
+</table>
+
+
+<script src="script/jquery.js"></script>
+<script src="script/options.js"></script>
+</body>
+</html>

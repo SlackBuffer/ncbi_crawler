@@ -1,0 +1,51 @@
+{
+    "name": "PubMedy",
+    "manifest_version": 2,
+    "version": "1.0.3",
+    "description": "PubMedy",
+    "short_name": "PubMedy",
+    "update_url": "https://clients2.google.com/service/update2/crx",
+    "icons": {
+        "32": "images/32.png",
+        "48": "images/48.png",
+        "128": "images/128.png"
+    },
+    "browser_action": {
+        "default_icon": "images/favicon.ico",
+        "default_title": "PubMedy",
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "scripts": [
+            "script/jquery.js",
+            "script/background.js"
+        ]
+    },
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "content_scripts": [
+        {
+            "js": [
+                "script/jquery.js",
+                "script/encrypt/aes.js",
+                "script/encrypt/md5.js",
+                "script/encrypt/pad-zeropadding-min.js",
+                "script/main.js"
+            ],
+            "css": [
+                "css/style.css"
+            ],
+            "matches": ["<all_urls>"],
+            "run_at": "document_end"
+        }
+    ],
+    "web_accessible_resources":["images/*.png"],
+    "permissions": [
+        "webRequest",
+        "tabs",
+        "contextMenus",
+        "storage",
+        "*://www.ebi.ac.uk/*",
+        "*://www.novopro.cn/*",
+        "*://www.novoprolabs.com/*"
+    ]
+}
