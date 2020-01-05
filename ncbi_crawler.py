@@ -19,7 +19,7 @@ target_url = 'https://www.ncbi.nlm.nih.gov/pubmed/?term=' + search_term
 # scrawl page numbers
 total_pages_wanted = 10
 # timeout for ajax request
-ajax_timeout = 30
+ajax_timeout = 60
 
 
 class element_has_gone(object):
@@ -95,10 +95,12 @@ def parse_sub_pages():
         driver.get(r[1])
         sub_soup = BeautifulSoup(driver.page_source, features='lxml')
 
-        sub_target_div_list = sub_soup.find('div', {'class': 'abstr'})
-        abstract_div = sub_target_div_list.find('div')
-        # article abstract
-        abstract_div_content = abstract_div.get_text()
+        abstract_div_content = "no abstract provided"
+        sub_target_div = sub_soup.find('div', {'class': 'abstr'})
+        if not (sub_target_div is None):
+            abstract_div = sub_target_div.find('div')
+            # article abstract
+            abstract_div_content = abstract_div.get_text()
 
         journal_name = sub_soup.select('.cit > span > a')[0]['title']
         publish_info = sub_soup.select('.cit')[0].contents[1]
