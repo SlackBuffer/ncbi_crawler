@@ -1,10 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 import pandas as pd
 
 from urllib.parse import urlparse
+from datetime import datetime
 import math
 import time
 import random
@@ -15,8 +17,9 @@ configuration
 """
 # scrawl target url
 search_term = 'c1q like protein'
+start_page = 1
 # scrawl page numbers
-total_pages_wanted = 10
+total_pages_wanted = 1
 # timeout for ajax request
 ajax_timeout = 60
 
@@ -32,6 +35,14 @@ class element_has_gone(object):
     else:
         return False
 
+def go_to_start_page(driver, page):
+    if page != 1:
+        page_input = driver.find_element_by_id("pageno")
+        page_input.clear()
+        page_input.send_keys(page)
+        # print(page_input.get_attribute('value'))
+        page_input.send_keys(Keys.RETURN)
+
 def gen_target_url(term):
     t = term.split(' ')
     return 'https://www.ncbi.nlm.nih.gov/pubmed/?term=' + '+'.join(t)
@@ -42,23 +53,25 @@ def bootstrap_chrome_driver():
     chrome_options.add_argument('--load-extension=./pubmedy')
     return webdriver.Chrome(chrome_options=chrome_options)
         
-def calc_pages(driver):
+def calc_pages(driver, start_page):
     total_items = int(driver.find_element_by_id('resultcount').get_property('value'))
     # print(total_items)
-    actual_total_pages = math.ceil(int(total_items) / DEFAULT_PAGE_SIZE)
+    if total_items < DEFAULT_PAGE_SIZE * start_page:
+        raise ValueError("Starting page number is too large!")
+    actual_total_pages = math.ceil((int(total_items) - (start_page - 1) * DEFAULT_PAGE_SIZE) / DEFAULT_PAGE_SIZE)
     if actual_total_pages < total_pages_wanted:
         return actual_total_pages
     return total_pages_wanted
 
 def handle_scrawl(driver, page_num):
     print("current page: ", page_num+1)
+    driver.get_screenshot_as_file(gen_screenshot_name(page_num+1))
     extention_ok = parse_static_content(driver)
     if extention_ok:
         WebDriverWait(driver, ajax_timeout).until(
             element_has_gone(".cited-num > img")
         )
     parse_cited_number(driver, page_num)
-    driver.get_screenshot_as_file(gen_screenshot_name(page_num+1))
 
 def parse_static_content(driver):
     soup = BeautifulSoup(driver.page_source, features='lxml')
@@ -105,7 +118,7 @@ def parse_cited_number(driver, page_num):
 def parse_sub_pages():
     for i in range(len(result_list)):
         if (i + 1) % 10 == 0:
-            print("collected " + str(i + 1) + " abstracts and counting...")
+            print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ": collected " + str(i + 1) + " abstracts and counting...")
         driver.get(result_list[i][1])
         sub_soup = BeautifulSoup(driver.page_source, features='lxml')
 
@@ -163,7 +176,9 @@ result_list = []
 driver = bootstrap_chrome_driver()
 driver.get(target_url)
 
-pages_to_crawl = calc_pages(driver)
+pages_to_crawl = calc_pages(driver, start_page)
+go_to_start_page(driver, start_page)
+
 for i in range(pages_to_crawl):
     if i == 0:
         handle_scrawl(driver, i)
@@ -178,8 +193,8 @@ parse_sub_pages()
 driver.close()
 
 arrange()
-result_list.insert(0, ["title", "page link", "impact factor", "science hub download link", "cited number", "journal", "publication", "abstract"])
+result_list.insert(0, ["Title", "Page Link", "Impact Factor", "Sci-Hub Download Link", "Cited Number", "Journal", "Publication", "Abstract"])
 df = pd.DataFrame()
 df = df.append(result_list)
 
-df.to_excel(search_term + '.xlsx')
+df.to_excel(search_term + datetime.now().strftime('%Y-%m-%d_%H:%M:%S') + '.xlsx')

@@ -17,7 +17,7 @@ It's a simple python ncbi crawler that, given the key word, helps to collect inf
 python3 ncbi_crawler.py
 ```
 
-This crawler is single-process. Additionally, after crawling one item, a random sleep time (1-3s) is added to avoid being banned by the ncbi server. So if you crawl for 100 items, an execution time of 3 minutes is to be expected.
+This crawler is single-process. Additionally, after crawling one item, a random sleep time (1-3s) is added to avoid being banned by the ncbi server. So if you crawl for 100 items, an execution time of 4 minutes is to be expected.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
