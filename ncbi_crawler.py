@@ -14,8 +14,7 @@ import random
 configuration
 """
 # scrawl target url
-search_term = 'ctrp'
-target_url = 'https://www.ncbi.nlm.nih.gov/pubmed/?term=' + search_term
+search_term = 'c1q like protein'
 # scrawl page numbers
 total_pages_wanted = 10
 # timeout for ajax request
@@ -33,6 +32,10 @@ class element_has_gone(object):
     else:
         return False
 
+def gen_target_url(term):
+    t = term.split(' ')
+    return 'https://www.ncbi.nlm.nih.gov/pubmed/?term=' + '+'.join(t)
+
 def bootstrap_chrome_driver():
     chrome_options = Options()
     # chrome_options.add_argument("--headless") # not supported
@@ -48,18 +51,23 @@ def calc_pages(driver):
     return total_pages_wanted
 
 def handle_scrawl(driver, page_num):
-    parse_static_content(driver)
-    WebDriverWait(driver, ajax_timeout).until(
-        element_has_gone(".cited-num > img")
-    )
+    print("current page: ", page_num+1)
+    extention_ok = parse_static_content(driver)
+    if extention_ok:
+        WebDriverWait(driver, ajax_timeout).until(
+            element_has_gone(".cited-num > img")
+        )
     parse_cited_number(driver, page_num)
     driver.get_screenshot_as_file(gen_screenshot_name(page_num+1))
 
 def parse_static_content(driver):
     soup = BeautifulSoup(driver.page_source, features='lxml')
     target_div_list = soup.find_all('div', {'class': 'rprt'})
+    extention_ok = True
     # prepare cited element list ahead; the list might shrink after some click is executed 
     cited_element_list = driver.find_elements_by_css_selector('.cited-num > img')
+    if len(cited_element_list) == 0:
+        extention_ok = False
     for i in range(len(target_div_list)):
         anchor = target_div_list[i].find('p', {'class': 'title'}).find('a')
         # article title
@@ -70,16 +78,20 @@ def parse_static_content(driver):
         """
         extra elements that the chrome extention pubmedy provides
         """
-        dl = target_div_list[i].select('.novopro-impactfactor-container > dl')[0]
-        # article impact factor
-        impact_factor = dl.select('*:nth-child(3)')[0].get_text()
-        # article download link
-        science_hub_link = get_science_hub_link(dl.select('*:nth-child(6)')[0].select('a'))
-        result_list.append([title, href, impact_factor, science_hub_link])
-        # print(title, '\n', href, '\n', impact_factor, '\n', science_hub_link)
+        if extention_ok:
+            dl = target_div_list[i].select('.novopro-impactfactor-container > dl')[0]
+            # article impact factor
+            impact_factor = dl.select('*:nth-child(3)')[0].get_text()
+            # article download link
+            science_hub_link = get_science_hub_link(dl.select('*:nth-child(6)')[0].select('a'))
+            result_list.append([title, href, to_float(impact_factor), science_hub_link])
+            # print(title, '\n', href, '\n', impact_factor, '\n', science_hub_link)
 
-        # click the img to trigger the ajax for cited number
-        cited_element_list[i].click()
+            # click the img to trigger the ajax for cited number
+            cited_element_list[i].click()
+        else:
+            result_list.append([title, href, "", "", ""])
+    return extention_ok
 
 def parse_cited_number(driver, page_num):
     soup = BeautifulSoup(driver.page_source, features='lxml')
@@ -88,11 +100,13 @@ def parse_cited_number(driver, page_num):
         # print(eles[i].get_text(), '\n') 
         offset = page_num * DEFAULT_PAGE_SIZE
         # article cited number
-        result_list[i + offset].append(eles[i].get_text())
+        result_list[i + offset].append(to_float(eles[i].get_text()))
 
 def parse_sub_pages():
-    for r in result_list:
-        driver.get(r[1])
+    for i in range(len(result_list)):
+        if (i + 1) % 10 == 0:
+            print("collected " + str(i + 1) + " abstracts and counting...")
+        driver.get(result_list[i][1])
         sub_soup = BeautifulSoup(driver.page_source, features='lxml')
 
         abstract_div_content = "no abstract provided"
@@ -104,9 +118,9 @@ def parse_sub_pages():
 
         journal_name = sub_soup.select('.cit > span > a')[0]['title']
         publish_info = sub_soup.select('.cit')[0].contents[1]
-        r.append(journal_name)
-        r.append(publish_info)
-        r.append(abstract_div_content)
+        result_list[i].append(journal_name)
+        result_list[i].append(publish_info)
+        result_list[i].append(abstract_div_content)
         # print(journal_name, publish_info)
 
         time.sleep(random.randint(1, 3))
@@ -134,7 +148,14 @@ def gen_screenshot_name(index):
 def arrange():
     i = 'do nothing for now'
 
+def to_float(s):
+    try:
+        return float(s)
+    except ValueError:
+        return s
 
+target_url = gen_target_url(search_term)
+# print(target_url)
 DEFAULT_PAGE_SIZE = 20
 base_url = get_base_url(target_url)
 result_list = []
