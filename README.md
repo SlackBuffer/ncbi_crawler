@@ -1,5 +1,5 @@
-# A simple ncbi crawler.
-A simple python ncbi crawler that, given the key word, helps to collect research article information including title, journal name, impact factor, cited number, abstract, download link and publication date.
+# A simple ncbi crawler
+It's a simple python ncbi crawler that, given the key word, helps to collect information of research articles including title, journal name, impact factor, cited number, abstract, download link and publication date. The result is saved as a `.xlsx` file.
 ## Getting Started
 ### Prerequisites
 - Python 3.x
